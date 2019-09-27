@@ -26,8 +26,8 @@ public class StudentRepositoryImpl implements StudentRepository {
 
     @Override
     public Student save(Student student) {
-        student.setId(UUID.randomUUID().toString());
-        students.put(student.getId(), student);
-        return student;
+        Student registered = student.toBuilder().id(UUID.randomUUID().toString()).build();
+        students.put(registered.getId(), registered);
+        return registered;
     }
 }
