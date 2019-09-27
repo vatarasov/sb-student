@@ -84,7 +84,7 @@ public class StudentControllerTest {
     }
 
     @Test
-    public void shouldReturnBadRequestWhenTryingToRegisterStudentWithEmptyOrNullName() throws Exception {
+    public void shouldReturnBadRequestWhenTryingToRegisterStudentWithEmptyNullOrNotPresentedName() throws Exception {
         Student emptyNameStudent = Student.of("", 16);
         Student nullNameStudent = Student.of(null, 16);
 
@@ -104,10 +104,17 @@ public class StudentControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(nullNameStudent)))
             .andExpect(MockMvcResultMatchers.status().isBadRequest());
+
+        mvc
+            .perform(MockMvcRequestBuilders
+                .post("/student")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"age\": 16}"))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
     @Test
-    public void shouldReturnBadRequestWhenTryingToRegisterStudentWithNullOrLessThanSixteenAge() throws Exception {
+    public void shouldReturnBadRequestWhenTryingToRegisterStudentWithNullLessThanSixteenOrNotPresentedAge() throws Exception {
         Student nullAgeStudent = Student.of("Student", null);
         Student lessThanSixteenAgeStudent = Student.of("Student", 15);
 
@@ -126,6 +133,13 @@ public class StudentControllerTest {
                 .post("/student")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(lessThanSixteenAgeStudent)))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest());
+
+        mvc
+            .perform(MockMvcRequestBuilders
+                .post("/student")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\": \"Student\"}"))
             .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
