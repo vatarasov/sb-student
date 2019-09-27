@@ -1,15 +1,28 @@
 package ru.vtarasov.sb.student;
 
-import lombok.Builder;
-import lombok.Value;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Null;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 /**
  * @author vtarasov
  * @since 21.09.2019
  */
-@Builder(toBuilder = true)
-@Value
+@RequiredArgsConstructor
+@EqualsAndHashCode(of = "id")
+@Getter
 public class Student {
-    private final String id;
+    @Setter
+    @Null
+    private String id;
+
+    @NotEmpty
     private final String name;
+
+    @Min(16)
+    private final int age;
 }
