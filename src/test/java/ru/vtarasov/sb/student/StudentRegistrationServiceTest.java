@@ -12,6 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment= WebEnvironment.NONE, classes = { StudentRegistrationServiceImpl.class, StudentRepositoryImpl.class })
 public class StudentRegistrationServiceTest {
+
 	@Autowired
 	private StudentRegistrationService studentRegistrationService;
 
