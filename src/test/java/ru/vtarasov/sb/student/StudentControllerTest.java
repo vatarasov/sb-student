@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -45,6 +46,7 @@ public class StudentControllerTest {
     }
 
     @Test
+    @WithUserDetails
     public void shouldNotFoundStudentIfNotRegistered() throws Exception {
         mvc
             .perform(MockMvcRequestBuilders.get("/student/{id}", "id-not-registered"))
@@ -52,6 +54,7 @@ public class StudentControllerTest {
     }
 
     @Test
+    @WithUserDetails
     public void shouldFoundStudentIfRegistered() throws Exception {
         mvc
             .perform(MockMvcRequestBuilders.get("/student/{id}", "id-registered"))
@@ -61,6 +64,7 @@ public class StudentControllerTest {
     }
 
     @Test
+    @WithUserDetails
     public void shouldReturnRegisteredStudentLocation() throws Exception {
         Mockito.when(studentRegistrationService.register(notRegisteredStudent)).thenReturn(registeredStudent);
         mvc
@@ -73,6 +77,7 @@ public class StudentControllerTest {
     }
 
     @Test
+    @WithUserDetails
     public void shouldReturnBadRequestWhenTryingToRegisterStudentWithNonNullId() throws Exception {
         Mockito.when(studentRegistrationService.register(registeredStudent)).thenReturn(registeredStudent);
         mvc
@@ -84,6 +89,7 @@ public class StudentControllerTest {
     }
 
     @Test
+    @WithUserDetails
     public void shouldReturnBadRequestWhenTryingToRegisterStudentWithEmptyNullOrNotPresentedName() throws Exception {
         Student emptyNameStudent = Student.of("", 16);
         Student nullNameStudent = Student.of(null, 16);
@@ -114,6 +120,7 @@ public class StudentControllerTest {
     }
 
     @Test
+    @WithUserDetails
     public void shouldReturnBadRequestWhenTryingToRegisterStudentWithNullLessThanSixteenOrNotPresentedAge() throws Exception {
         Student nullAgeStudent = Student.of("Student", null);
         Student lessThanSixteenAgeStudent = Student.of("Student", 15);
@@ -144,6 +151,7 @@ public class StudentControllerTest {
     }
 
     @Test
+    @WithUserDetails
     public void shouldUnregisterStudentIfRegistered() throws Exception {
         mvc
             .perform(MockMvcRequestBuilders.delete("/student/{id}", "id-registered"))
@@ -151,6 +159,7 @@ public class StudentControllerTest {
     }
 
     @Test
+    @WithUserDetails
     public void shouldNotFoundStudentWhenUnregisteringOfNotRegistered() throws Exception {
         mvc
             .perform(MockMvcRequestBuilders.delete("/student/{id}", "id-not-registered"))
