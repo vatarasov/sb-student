@@ -8,10 +8,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithUserDetails;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -23,6 +26,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(StudentController.class)
+@ActiveProfiles("test")
 public class StudentControllerTest {
     @Autowired
     private MockMvc mvc;
@@ -32,6 +36,12 @@ public class StudentControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Value("${spring.security.wrong-user.name}")
+    private String wrongName;
+
+    @Value("${spring.security.wrong-user.password}")
+    private String wrongPassword;
 
     private Student notRegisteredStudent;
     private Student registeredStudent;
@@ -164,5 +174,50 @@ public class StudentControllerTest {
         mvc
             .perform(MockMvcRequestBuilders.delete("/student/{id}", "id-not-registered"))
             .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
+    public void shouldReturnUnauthorizedWhenTryingToFindStudentWithNoOrWrongCredentials() throws Exception {
+        mvc
+            .perform(MockMvcRequestBuilders.get("/student/{id}", "id-registered"))
+            .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+
+        mvc
+            .perform(MockMvcRequestBuilders
+                .get("/student/{id}", "id-registered")
+                .with(SecurityMockMvcRequestPostProcessors.httpBasic(wrongName, wrongPassword)))
+            .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+    }
+
+    @Test
+    public void shouldReturnUnauthorizedWhenTryingToRegisterStudentWithNoOrWrongCredentials() throws Exception {
+        Mockito.when(studentRegistrationService.register(notRegisteredStudent)).thenReturn(registeredStudent);
+
+        mvc
+            .perform(MockMvcRequestBuilders
+                .post("/student")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(notRegisteredStudent)))
+            .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+
+        mvc
+            .perform(MockMvcRequestBuilders
+                .post("/student")
+                .with(SecurityMockMvcRequestPostProcessors.httpBasic(wrongName, wrongPassword))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(notRegisteredStudent)))
+            .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+    }
+
+    @Test
+    public void shouldReturnUnauthorizedWhenTryingToUnregisterStudentWithNoOrWrongCredentials() throws Exception {
+        mvc
+            .perform(MockMvcRequestBuilders.delete("/student/{id}", "id-registered"))
+            .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+
+        mvc
+            .perform(MockMvcRequestBuilders.delete("/student/{id}", "id-registered")
+                .with(SecurityMockMvcRequestPostProcessors.httpBasic(wrongName, wrongPassword)))
+            .andExpect(MockMvcResultMatchers.status().isUnauthorized());
     }
 }
